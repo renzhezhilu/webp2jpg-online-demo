@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>avif_enc</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="avif_enc.js"></script>
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+    <h1>avif_enc demo</h1>
+    <h4>Input picture format:jpeg、jpg、png、gif、webp、svg、ico、bmp、avif。Multiple files can be selected</h4>
+    <input type="file" id="files" accept=".jpeg,.jpg,.png,.gif,.webp,.svg,.ico,.bmp" multiple />
+    <div id="outBox"></div>
+    <div id="loading">Converting...</div>
+    <script>
+        function imgConver(file) {
+            return new Promise((resolve, reject) => {
+                let _canvas = document.createElement("canvas");
+                let _img = new Image();
+                _img.src = window.URL.createObjectURL(file);
+                _img.onload = function() {
+                    _canvas.setAttribute("width", this.width);
+                    _canvas.setAttribute("height", this.height);
+                    _canvas.getContext("2d").drawImage(this, 0, 0);
+                    let data = _canvas
+                        .getContext("2d")
+                        .getImageData(0, 0, this.width, this.height);
+                    avif_enc().then(avif_enc_wasm => {
+                        let avifImg = avif_enc_wasm.encode(
+                            data.data,
+                            this.width,
+                            this.height, {
+                                minQuantizer: 33,
+                                maxQuantizer: 63,
+                                minQuantizerAlpha: 33,
+                                maxQuantizerAlpha: 63,
+                                tileColsLog2: 0,
+                                tileRowsLog2: 0,
+                                speed: 8,
+                                subsample: 1
+                            }
+                        );
+                        let outImgBlob = new Blob([avifImg.buffer], {
+                            type: "image/avif"
+                        });
+                        resolve({
+                            url: URL.createObjectURL(outImgBlob),
+                            size: (file.size / 1024).toFixed(1) + ' Kb -> ' +
+                                (outImgBlob.size / 1024).toFixed(1) + ' Kb'
+                        });
+                    });
+
+                };
+            });
+        }
+
+        let input = document.getElementById("files");
+        let outBox = document.getElementById("outBox");
+        let loading = document.getElementById("loading");
+        let outData = 0
+        let intData = 0
+        input.addEventListener("change", function() {
+            document.getElementById('loading').style.display = 'block'
+            for (const key in this.files) {
+                if (this.files.hasOwnProperty(key)) {
+                    intData++
+                    imgConver(this.files[key]).then(outImg => {
+                        outBox.insertAdjacentHTML('beforeend',
+                            `<li><div><img src="${outImg.url}"></div><p>${outImg.size}</p></li>`);
+                        outData++
+                        if (outData === intData) document.getElementById('loading').style.display = 'none'
+                    })
+                }
+            }
+        }, false);
+    </script>
+</body>
+
+</html>
