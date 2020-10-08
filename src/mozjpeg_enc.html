@@ -29,8 +29,8 @@
                     let data = _canvas
                         .getContext("2d")
                         .getImageData(0, 0, this.width, this.height);
-                    mozJpeg().then(mozJpeg_wasm => {
-                        let avifImg = mozJpeg_wasm.encode(
+                    mozjpeg_enc().then(mozjpeg_enc_wasm => {
+                        let avifImg = mozjpeg_enc_wasm.encode(
                             data.data,
                             this.width,
                             this.height, {
@@ -40,7 +40,7 @@
                                 progressive: true,
                                 optimize_coding: true,
                                 smoothing: 0,
-                                color_space: 1,
+                                color_space: 3,
                                 quant_table: 3,
                                 trellis_multipass: false,
                                 trellis_opt_zero: false,
