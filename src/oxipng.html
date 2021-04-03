@@ -4,23 +4,35 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>mozjpeg_enc</title>
+    <title>oxipng</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="mozjpeg_enc.js"></script>
+    <script src="oxipng.js"></script>
     <link rel="stylesheet" href="main.css">
 </head>
 
 <body>
-    <h3>
-		import mozjpeg_enc from "<a target="blank"
-			href="https://github.com/GoogleChromeLabs/squoosh">https://github.com/GoogleChromeLabs/squoosh</a>"
-	</h3>
-	<hr>
-    <h1>mozjpeg_enc demo</h1>
+
+    <h1>oxipng demo</h1>
     <h4>Input picture format:jpeg、jpg、png、gif、webp、svg、ico、bmp、avif。Multiple files can be selected</h4>
     <input type="file" id="files" accept=".jpeg,.jpg,.png,.gif,.webp,.svg,.ico,.bmp,.avif" multiple />
     <div id="outBox"></div>
     <div id="loading">Converting...</div>
+
+
+
+    <script type='module'>
+        // import oxipng from './oxipng.js';
+        // console.log(oxipng('/oxipng_bg.wasm').then(d=>{
+
+        // console.log(start);
+
+        // }));
+    </script>
+
+
+
+
+
     <script>
         function imgConver(file) {
             return new Promise((resolve, reject) => {
@@ -34,38 +46,48 @@
                     let data = _canvas
                         .getContext("2d")
                         .getImageData(0, 0, this.width, this.height);
-                    mozjpeg_enc().then(mozjpeg_enc_wasm => {
-                        let avifImg = mozjpeg_enc_wasm.encode(
-                            data.data,
-                            this.width,
-                            this.height, {
-                                quality: 75,
-                                baseline: false,
-                                arithmetic: false,
-                                progressive: true,
-                                optimize_coding: true,
-                                smoothing: 0,
-                                color_space: 3,
-                                quant_table: 3,
-                                trellis_multipass: false,
-                                trellis_opt_zero: false,
-                                trellis_opt_table: false,
-                                trellis_loops: 1,
-                                auto_subsample: true,
-                                chroma_subsample: 2,
-                                separate_chroma_quality: false,
-                                chroma_quality: 75,
-                            }
-                        );
-                        let outImgBlob = new Blob([avifImg.buffer], {
-                            type: "image/avif"
-                        });
-                        resolve({
-                            url: URL.createObjectURL(outImgBlob),
-                            size: (file.size / 1024).toFixed(1) + ' Kb -> ' +
-                                (outImgBlob.size / 1024).toFixed(1) + ' Kb'
-                        });
-                    });
+                    let start = opxFun()
+
+                    opxFun().init('./oxipng_bg.wasm').then(async (d) => {
+                        console.log(start.optimise(new Uint8Array(await new Response(file)
+                            .arrayBuffer()), 2).buffer);
+
+                    })
+
+
+
+                    // mozjpeg_enc().then(mozjpeg_enc_wasm => {
+                    //     let avifImg = mozjpeg_enc_wasm.encode(
+                    //         data.data,
+                    //         this.width,
+                    //         this.height, {
+                    //             quality: 75,
+                    //             baseline: false,
+                    //             arithmetic: false,
+                    //             progressive: true,
+                    //             optimize_coding: true,
+                    //             smoothing: 0,
+                    //             color_space: 3,
+                    //             quant_table: 3,
+                    //             trellis_multipass: false,
+                    //             trellis_opt_zero: false,
+                    //             trellis_opt_table: false,
+                    //             trellis_loops: 1,
+                    //             auto_subsample: true,
+                    //             chroma_subsample: 2,
+                    //             separate_chroma_quality: false,
+                    //             chroma_quality: 75,
+                    //         }
+                    //     );
+                    //     let outImgBlob = new Blob([avifImg.buffer], {
+                    //         type: "image/avif"
+                    //     });
+                    //     resolve({
+                    //         url: URL.createObjectURL(outImgBlob),
+                    //         size: (file.size / 1024).toFixed(1) + ' Kb -> ' +
+                    //             (outImgBlob.size / 1024).toFixed(1) + ' Kb'
+                    //     });
+                    // });
 
                 };
             });

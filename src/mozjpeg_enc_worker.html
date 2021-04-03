@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>mozjpeg_enc</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <script src="mozjpeg_enc.js"></script> -->
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+    <h3>
+		import mozjpeg_enc from "<a target="blank"
+			href="https://github.com/GoogleChromeLabs/squoosh">https://github.com/GoogleChromeLabs/squoosh</a>"
+	</h3>
+	<hr>
+    <h1>mozjpeg_enc Multi worker demo</h1>
+    <h4>Input picture format:jpeg、jpg、png、gif、webp、svg、ico、bmp、avif。Multiple files can be selected</h4>
+    <input type="file" id="files" accept=".jpeg,.jpg,.png,.gif,.webp,.svg,.ico,.bmp,.avif" multiple />
+    <div id="outBox"></div>
+    <div id="loading">Converting...</div>
+    <script>
+
+        function imgConver(file) {
+            return new Promise((resolve, reject) => {
+                let _canvas = document.createElement("canvas");
+                let _img = new Image();
+                _img.src = window.URL.createObjectURL(file);
+                _img.onload = function () {
+                    _canvas.setAttribute("width", this.width);
+                    _canvas.setAttribute("height", this.height);
+                    _canvas.getContext("2d").drawImage(this, 0, 0);
+                    console.log(11);
+                    let data = _canvas
+                        .getContext("2d")
+                        .getImageData(0, 0, this.width, this.height);
+                    resolve({
+                        imgData: data.data,
+                        width: this.width,
+                        height: this.height,
+                        fileSize: file.size
+                    });
+                };
+            });
+        }
+
+        let input = document.getElementById("files");
+        let outBox = document.getElementById("outBox");
+        let loading = document.getElementById("loading");
+        let outData = 0
+        let intData = 0
+        input.addEventListener("change", function () {
+            document.getElementById('loading').style.display = 'block'
+            let startTime = new Date().getTime()
+            for (const key in this.files) {
+                if (this.files.hasOwnProperty(key)) {
+                    intData++
+                    setTimeout(() => {
+                        imgConver(this.files[key]).then(outImg => {
+                        console.log(outImg);
+                        // 开启线程
+                        const myWorker = new Worker("mozjpeg_enc_worker.js");
+                        myWorker.postMessage(outImg);
+                        myWorker.onmessage = function (e) {
+                            // console.log('ookk', e);
+                            outData++
+                            outBox.insertAdjacentHTML('beforeend',
+                                `<li><div><img src="${URL.createObjectURL(e.data.url)}"></div><p>${e.data.size}</p></li>`
+                            );
+                            if (outData === intData) {
+                                let jjj = (new Date().getTime() - startTime) / 1000
+                                outBox.insertAdjacentHTML('beforeend',
+                                    `<br/><h1>${jjj}秒, 每张耗时：${jjj/outData}秒</h1>`
+                                );
+                                document.getElementById('loading').style
+                                    .display =
+                                    'none'
+                            }
+                            myWorker.terminate()
+                        }
+                    })
+                    }, 100*intData);
+
+                }
+            }
+        }, false);
+    </script>
+    <style>
+        #outBox {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        #outBox li {
+            padding: 2px;
+            list-style: none;
+        }
+
+        #outBox div {
+            width: 50px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #outBox img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        #outBox p {
+            display: none;
+            font-size: 8px;
+            line-height: 10px;
+        }
+
+        #loading {
+            padding: 20px;
+            font-size: 40px;
+            line-height: 100px;
+            display: none;
+        }
+
+        #files {
+            zoom: 2;
+        }
+    </style>
+</body>
+
+</html>

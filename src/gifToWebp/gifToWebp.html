@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>gif to webp</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="../main.css">
+</head>
+
+<body>
+    <h3>
+        import wasm-im from "<a target="blank"
+            href="https://github.com/mk33mk333/wasm-im">https://github.com/mk33mk333/wasm-im</a>"
+    </h3>
+    <h2 style="color:red">Running...</h2>
+    <hr>
+    <h1>gif to webp demo</h1>
+    <hr>
+    before
+    <b>size: <span id="before_t"></span> </b>
+    <img id="before" width="200" alt="">
+    <br>
+    after:
+    <b>size: <span id="after_t"></span> </b>
+    <img id="after" width="200"></img>
+    <br>
+    <hr>
+    size: <span id="size"></span>
+    <br>
+    time: <span id="time"></span>
+
+
+    <script>
+        var Module = {}
+        Module.onRuntimeInitialized = function () {
+
+            FS.mkdir("/im");
+            FS.currentPath = "/im";
+            fetchPic(Module)
+
+            Module.locateFile = _ => 'https://cdn.jsdelivr.net/gh/renzhezhilu/webp2jpg-online/cdn/wasm-im.wasm'
+        };
+        async function fetchPic(Module) {
+            // file type : jpg webp gif
+            let fileName_before = 'picAnyName.gif'
+            let fileName_after = 'picAnyName.webp'
+            let buff = await fetch('./11.gif').then(d => d.arrayBuffer())
+            let blob = await fetch('./11.gif').then(d => d.blob())
+
+            let time = new Date().getTime()
+
+            FS.writeFile(fileName_before, new Uint8Array(buff));
+            let cmd = [
+                `convert`,
+                `${fileName_before}`,
+                // `-resize`,
+                // `${w}x${h}`,
+                `-quality`,
+                `75`,
+                `-strip`,
+                `${fileName_after}`
+            ];
+            Module.callMain(cmd);
+            let outFile = FS.readFile(`${fileName_after}`).buffer;
+            let newBlob = new Blob([outFile], {
+                type: `image/webp`
+            });
+
+            document.querySelector("#before").src = URL.createObjectURL(blob)
+            document.querySelector("#before_t").append(blob.size / 1000 + 'Kb')
+            document.querySelector("#after").src = URL.createObjectURL(newBlob)
+            document.querySelector("#after_t").append(newBlob.size / 1000 + 'Kb')
+            time = (new Date().getTime() - time) / 1000
+            time = time.toFixed(1)
+            document.querySelector("#time").append(time + ' s')
+            document.querySelector("h2").style.display = 'none'
+
+            // console.log(newBlob);
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/renzhezhilu/webp2jpg-online/cdn/wasm-im.js"></script>
+
+
+</body>
+
+</html>

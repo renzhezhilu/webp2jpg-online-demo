@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>SVGO browser test</title>
+	<!-- need to `npm run script-pack` first to generate output -->
+	<!-- and start a local HTTP server -->
+	<script src="./SVGO.js"></script>
+</head>
+
+<body>
+
+
+	<h3>
+		import SVGO from "<a target="blank"
+			href="https://github.com/dr-js/libsvgo">https://github.com/dr-js/libsvgo</a>"
+	</h3>
+    <h2 style="color:red">Running...</h2>
+
+	<hr>
+
+	before
+	<b>size: <span id="before_t"></span> </b>
+	<img id="before" width="200" alt="">
+	<br>
+	after:
+	<b>size: <span id="after_t"></span> </b>
+	<img id="after" width="200"></img>
+	<br>
+	<hr>
+	size: <span id="size"></span>
+	<br>
+	time: <span id="time"></span>
+
+	<script>
+		const main = async () => {
+			const filepath = './33.svg'
+			const blob = await fetch(filepath).then(d => d.blob())
+			const text = await fetch(filepath).then(d => d.text())
+			// console.log( text,blob);
+			document.querySelector("#before").src = URL.createObjectURL(blob)
+			document.querySelector("#before_t").append(blob.size / 1000 + 'Kb')
+
+			/////////////////////////
+			let time = new Date().getTime()
+			const svgo = new SVGO()
+			const result = await svgo.optimize(text)
+			let newBlob = new Blob([result.data], {
+				type: 'image/svg+xml'
+			})
+
+			document.querySelector("#after").src = URL.createObjectURL(newBlob)
+			document.querySelector("#after_t").append(newBlob.size / 1000 + 'Kb')
+			document.querySelector("#size").append(`${result.info.width}x${result.info.height}`)
+			time = (new Date().getTime() - time) / 1000
+			time = time.toFixed(1)
+			document.querySelector("#time").append(time + ' s')
+            document.querySelector("h2").style.display = 'none'
+
+			console.log(result);
+		}
+
+		main().catch(console.error)
+	</script>
+</body>
+
+</html>
