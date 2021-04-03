@@ -1,6 +1,4 @@
 # browser-image-conversion-dome
-The simplest demo of the wasm file of the [squoosh](https://github.com/GoogleChromeLabs/squoosh) project
-
 Here are some libraries about using the browser to do image processing (format conversion), and make the corresponding demo pages.
 
 这里收集了一些关于使用浏览器做图片处理（格式转换）的库，并制作了相应的演示页面。
