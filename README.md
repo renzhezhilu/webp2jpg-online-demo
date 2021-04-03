@@ -9,7 +9,7 @@ Here are some libraries about using the browser to do image processing (format c
 ### format conversion
 
 |format|demo|intput data type|from|
-|---|-----|----|----|-----|---|
+|---|-----|---|---|
 |mozjpeg|✔️|[Uint8ClampedArray](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8ClampedArray)|[squoosh](https://github.com/GoogleChromeLabs/squoosh)|
 |avif|✔️|[Uint8ClampedArray](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8ClampedArray)|[squoosh](https://github.com/GoogleChromeLabs/squoosh)|
 |webp|✔️|[Uint8ClampedArray](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8ClampedArray)|[squoosh](https://github.com/GoogleChromeLabs/squoosh)|
