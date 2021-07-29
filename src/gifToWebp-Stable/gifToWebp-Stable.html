@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>gif to webp 稳定</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="../main.css">
+</head>
+
+<body>
+    <a href="../../">home</a>
+    <h3>
+        import wasm-im from "<a target="blank"
+            href="https://github.com/mk33mk333/wasm-im">https://github.com/mk33mk333/wasm-im</a>"
+        <br>
+        import pixel from "<a target="blank"
+            href="https://github.com/59naga/pixel/">https://github.com/59naga/pixel/</a>"
+    </h3>
+
+    <hr>
+    <h1>gif to webp 稳定 demo</h1>
+    <p>改进后的画面完美，速度不影响，有时甚至快几秒 </p>
+    <p>直接吧gif丢进去容易画面解析崩坏，应该是wasm-im里的gif解析的问题，如下：</p>
+    <img src="after.webp" width="200" alt="">
+    <br>
+    <p>
+        before:
+        gif file -> wasm-im -> webp file
+    </p>
+    <p>
+        now: gif file -> pixel -> imageData array -> browser png -> wasm-im -> webp file
+    </p>
+    <hr>
+    <div class="intput" style="display: none;">
+        <h4>Input picture format:gif、webp。Multiple files can be selected</h4>
+        <input type="file" id="files" accept=".gif,.webp" multiple />
+
+    </div>
+    <h2 style="color:red">Running...</h2>
+
+    <hr>
+    before
+    <b>size: <span id="before_t"></span> </b>
+    <img id="before" width="200" alt="">
+    <br>
+    after:
+    <b>size: <span id="after_t"></span> </b>
+    <img id="after" width="200"></img>
+    <br>
+    <hr>
+    width height: <span id="size"></span>
+    <br>
+    time: <span id="time"></span>
+
+    <script src="https://unpkg.com/pixel@0.1.3/index.browser.js"></script>
+
+    <script>
+        var Module = {}
+        Module.onRuntimeInitialized = function () {
+            console.log(FS);
+            // return
+            // FS.mayDelete("/im")
+            FS.mkdir("/im");
+            FS.currentPath = "/im";
+            Module.locateFile = _ => 'https://cdn.jsdelivr.net/gh/renzhezhilu/webp2jpg-online/cdn/wasm-im.wasm'
+
+            // fetchPic(Module)
+            // 
+            newFetchPic()
+            setInput()
+        };
+
+        function newFetchPic(file = '33.gif') {
+            document.querySelector("h2").style.display = 'block'
+            return new Promise(async (resolve, reject) => {
+                let blob = await fetch(file).then(d => d.blob())
+                pixel(blob).then(async data => {
+                    console.log(data);
+
+                    let time = new Date().getTime()
+                    let allNmae = []
+                    let webpName = 'picAnyName.webp'
+                    for (let index = 0; index < data.length; index++) {
+                        let d = data[index];
+                        let one = await imageDataToPngArrayBuffer(d)
+                        let name = `gif${index}.png`
+                        FS.writeFile(name, one);
+                        allNmae.push(name)
+                    }
+                    console.log(allNmae);
+                    console.log(data[0].delay);
+                    let cmd = [
+                        `convert`,
+                        `-delay`,
+                        `${data[0].delay/10}`,
+                        ...allNmae,
+                        // `-resize`,
+                        // `${w}x${h}`,
+                        `-quality`,
+                        `75`,
+                        `-strip`,
+                        `${webpName}`
+                    ];
+                    Module.callMain(cmd);
+                    let outFile = FS.readFile(`${webpName}`).buffer;
+                    let newBlob = new Blob([outFile], {
+                        type: `image/webp`
+                    });
+                    console.log(newBlob);
+                    // 
+
+                    document.querySelector("#before").src = URL.createObjectURL(blob)
+                    document.querySelector("#before_t").innerText=(blob.size / 1000 + 'Kb')
+                    document.querySelector("#after").src = URL.createObjectURL(newBlob)
+                    document.querySelector("#after_t").innerText=(newBlob.size / 1000 + 'Kb')
+                    document.querySelector("#size").innerText=(data[0].width +' x ' + data[0].height)
+                    time = (new Date().getTime() - time) / 1000
+                    time = time.toFixed(1)
+                    document.querySelector("#time").innerText = time + ' s'
+                    document.querySelector("h2").style.display = 'none'
+                    document.querySelector(".intput").style.display = 'block'
+                    // resolve(out);
+                })
+            })
+        }
+
+        function imageDataToPngArrayBuffer(iData) {
+            return new Promise((resolve, reject) => {
+                let _canvas = document.createElement('canvas')
+                _canvas.setAttribute('width', iData.width)
+                _canvas.setAttribute('height', iData.height)
+                _canvas.getContext("2d").putImageData(iData, 0, 0)
+                _canvas.toBlob(blob => {
+                    new Response(blob).arrayBuffer().then(buff => {
+                        resolve(new Uint8Array(buff));
+                    })
+                }, `image/png`)
+            })
+        }
+
+        function setInput() {
+            let input = document.getElementById("files");
+            input.addEventListener("change", function () {
+                console.log(this.files[0]);
+                newFetchPic(URL.createObjectURL(this.files[0]))
+            })
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/renzhezhilu/webp2jpg-online/cdn/wasm-im.js"></script>
+
+
+</body>
+
+</html>

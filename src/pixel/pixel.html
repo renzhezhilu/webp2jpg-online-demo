@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>webp_enc</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="webp_enc.js"></script>
+    <link rel="stylesheet" href="main.css">
+    <script src="https://unpkg.com/pixel@0.1.3/index.browser.js"></script>
+    <script>
+      console.log(pixel); //function
+        pixel('22.gif').then(d=>{
+            console.log(d);
+        })
+    </script>
+</head>
+
+<body>
+    <a href="../">home</a>
+    <h3>
+		import webp_enc from "<a target="blank"
+			href="https://github.com/GoogleChromeLabs/squoosh">https://github.com/GoogleChromeLabs/squoosh</a>"
+	</h3>
+	<hr>
+    <h1>webp_enc demo</h1>
+    <h4>Input picture format:jpeg、jpg、png、gif、webp、svg、ico、bmp、avif。Multiple files can be selected</h4>
+    <input type="file" id="files" accept=".jpeg,.jpg,.png,.gif,.webp,.svg,.ico,.bmp,.avif" multiple />
+
+</body>
+
+</html>

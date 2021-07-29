@@ -1,8 +1,9 @@
 # browser-image-conversion-dome
-Here are some libraries about using the browser to do image processing (format conversion), and make the corresponding demo pages.
+<!-- Here are some libraries about using the browser to do image processing (format conversion), and make the corresponding demo pages. -->
 
-这里收集了一些关于使用浏览器做图片处理（格式转换）的库，并制作了相应的演示页面。
-### demo
+<!-- 这里收集了一些关于使用浏览器做图片处理（格式转换）的库，并制作了相应的演示页面。 -->
+这里集合了[webp2jpg-online](https://github.com/renzhezhilu/webp2jpg-online)用到的功能demo
+### 地址
 [github page](https://renzhezhilu.github.io/browser-image-conversion-dome/) or [gitee page](https://renzhezhilu.gitee.io/browser-image-conversion-dome/)
 
 
