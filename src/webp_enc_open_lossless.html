@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>webp_enc_open_lossless</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="webp_enc.js"></script>
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+    <a href="../">home</a>
+    <h3>
+		import webp_enc from "<a target="blank"
+			href="https://github.com/GoogleChromeLabs/squoosh">https://github.com/GoogleChromeLabs/squoosh</a>"
+	</h3>
+	<hr>
+    <h1>webp_enc_open_lossless demo</h1>
+    <h4>Input picture format:jpeg、jpg、png、gif、webp、svg、ico、bmp、avif。Multiple files can be selected</h4>
+    <input type="file" id="files" accept=".jpeg,.jpg,.png,.gif,.webp,.svg,.ico,.bmp,.avif" multiple />
+    <div id="outBox"></div>
+    <div id="loading">Converting...</div>
+    <script>
+        function imgConver(file) {
+            return new Promise((resolve, reject) => {
+                let _canvas = document.createElement("canvas");
+                let _img = new Image();
+                _img.src = window.URL.createObjectURL(file);
+                _img.onload = function() {
+                    _canvas.setAttribute("width", this.width);
+                    _canvas.setAttribute("height", this.height);
+                    _canvas.getContext("2d").drawImage(this, 0, 0);
+                    let data = _canvas
+                        .getContext("2d")
+                        .getImageData(0, 0, this.width, this.height);
+                    webp_enc().then(webp_enc_wasm => {
+                        let avifImg = webp_enc_wasm.encode(
+                            data.data,
+                            this.width,
+                            this.height, {
+                                quality: 100,
+                                target_size: 0,
+                                target_PSNR: 0,
+                                method: 4,
+                                sns_strength: 50,
+                                filter_strength: 60,
+                                filter_sharpness: 0,
+                                filter_type: 1,
+                                partitions: 0,
+                                segments: 4,
+                                pass: 1,
+                                show_compressed: 0,
+                                preprocessing: 0,
+                                autofilter: 0,
+                                partition_limit: 0,
+                                alpha_compression: 1,
+                                alpha_filtering: 1,
+                                alpha_quality: 100,
+                                lossless: 1,
+                                exact: 0,
+                                image_hint: 0,
+                                emulate_jpeg_size: 0,
+                                thread_level: 0,
+                                low_memory: 0,
+                                near_lossless: 100,
+                                use_delta_palette: 0,
+                                use_sharp_yuv: 0,
+                            }
+                        );
+                        let outImgBlob = new Blob([avifImg.buffer], {
+                            type: "image/avif"
+                        });
+                        resolve({
+                            url: URL.createObjectURL(outImgBlob),
+                            size: (file.size / 1024).toFixed(4) + ' Kb -> ' +
+                                (outImgBlob.size / 1024).toFixed(4) + ' Kb'
+                        });
+                    });
+
+                };
+            });
+        }
+
+        let input = document.getElementById("files");
+        let outBox = document.getElementById("outBox");
+        let loading = document.getElementById("loading");
+        let outData = 0
+        let intData = 0
+        input.addEventListener("change", function() {
+            document.getElementById('loading').style.display = 'block'
+            for (const key in this.files) {
+                if (this.files.hasOwnProperty(key)) {
+                    intData++
+                    imgConver(this.files[key]).then(outImg => {
+                        outBox.insertAdjacentHTML('beforeend',
+                            `<li><div><img width=260 src="${outImg.url}"></div><p>${outImg.size}</p></li>`);
+                        outData++
+                        if (outData === intData) document.getElementById('loading').style.display = 'none'
+                    })
+                }
+            }
+        }, false);
+    </script>
+</body>
+
+</html>
